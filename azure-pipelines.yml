@@ -1,0 +1,35 @@
+# Azure Pipelines YAML file for Node.js application
+
+trigger:
+  branches:
+    include:
+      - main  # Change this to your main branch name
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '14.x'  # Change this to your Node.js version
+
+- script: |
+    npm install
+    npm run build  # Adjust this if your build command is different
+  displayName: 'Install dependencies and build'
+
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+    replaceExistingArchive: true
+  displayName: 'Archive build output'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    artifactName: 'drop'
+    publishLocation: 'Container'
+  displayName: 'Publish build artifact'
